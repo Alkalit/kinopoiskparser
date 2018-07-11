@@ -40,29 +40,30 @@ def parse_a_page(link):
     return (name, link, int(likes), int(dislikes))
 
 def main():
-    # database_path = './parser.db'
+    database_path = './parser.db'
 
-    # sql_create_film_table = """
-    #     CREATE TABLE IF NOT EXISTS projects (
-    #         id integer PRIMARY KEY,
-    #         name text NOT NULL,
-    #         url text NOT NULL,
-    #         like text NOT NULL,
-    #         dislike integer NOT NULL
-    #     );
-    # """
+    sql_create_film_table = """
+        CREATE TABLE IF NOT EXISTS film (
+            id integer PRIMARY KEY,
+            name text NOT NULL,
+            url text NOT NULL,
+            like text NOT NULL,
+            dislike integer NOT NULL
+        );
+    """
 
-    # conn = create_connection(database_path)
-    # if conn is not None:
-    #     create_table(conn, sql_create_film_table)
-    # else:
-    #     print("Error! cannot create the database connection.")
+    conn = create_connection(database_path)
+    if conn is not None:
+        create_table(conn, sql_create_film_table)
+    else:
+        print("Error! cannot create the database connection.")
+    cursor = conn.cursor()
 
     links = get_links()
 
     for link in links:
-        print(parse_a_page(link))
-    # print(get_links())
+        name, link, likes, dislikes = parse_a_page(link)
+        cursor.execute("INSERT INTO film (name, url, like, dislike) VALUES ('{}','{}', {},{})".format(name, link, likes, dislikes))
 
 if __name__ == "__main__":
     main()

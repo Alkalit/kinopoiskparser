@@ -27,6 +27,7 @@ share/
 pip-selfcheck.json
 .installed.cfg
 *.egg
+*.db
 MANIFEST
 
 # PyInstaller
