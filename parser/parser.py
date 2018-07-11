@@ -40,7 +40,7 @@ def parse_a_page(link):
     return (name, link, int(likes), int(dislikes))
 
 def main():
-    database_path = './parser.db'
+    database_path = 'parser.db'
 
     sql_create_film_table = """
         CREATE TABLE IF NOT EXISTS film (
