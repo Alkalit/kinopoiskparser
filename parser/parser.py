@@ -63,8 +63,8 @@ def main():
 
     for link in links:
         name, link, likes, dislikes = parse_a_page(link)
-        print(name, link, likes, dislikes)
-        cursor.execute("INSERT INTO film (name, url, like, dislike) VALUES ('{}','{}', {},{})".format(name, link, likes, dislikes))
+        print(name, link, likes, dislikes) # TODO logging
+        cursor.execute("INSERT INTO film (name, url, like, dislike) VALUES (?,?, ?,?)", [name, link, likes, dislikes])
 
     conn.commit()
     conn.close()
