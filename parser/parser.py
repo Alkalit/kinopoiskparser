@@ -53,17 +53,21 @@ def main():
     """
 
     conn = create_connection(database_path)
+    cursor = conn.cursor()
     if conn is not None:
         create_table(conn, sql_create_film_table)
     else:
         print("Error! cannot create the database connection.")
-    cursor = conn.cursor()
 
     links = get_links()
 
     for link in links:
         name, link, likes, dislikes = parse_a_page(link)
+        print(name, link, likes, dislikes)
         cursor.execute("INSERT INTO film (name, url, like, dislike) VALUES ('{}','{}', {},{})".format(name, link, likes, dislikes))
+
+    conn.commit()
+    conn.close()
 
 if __name__ == "__main__":
     main()
