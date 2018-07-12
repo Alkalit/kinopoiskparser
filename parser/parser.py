@@ -1,9 +1,14 @@
 import threading
+import logging
 import sqlite3
 import requests
+
 from bs4 import BeautifulSoup
 
 DATABASE_PATH = 'parser.db'
+DB_LOCK = threading.Lock()
+
+logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-10s) %(message)s',)
 
 def create_connection(db_file):
     try:
@@ -33,6 +38,9 @@ def get_links():
 
 def parse_a_page(link):
 
+    conn = create_connection(DATABASE_PATH)
+    cursor = conn.cursor()
+
     response = requests.get(link)
     bs = BeautifulSoup(response.content, 'html.parser')
 
@@ -40,7 +48,12 @@ def parse_a_page(link):
     likes = bs.find('li', {'class': 'pos'}).find('b').text
     dislikes = bs.find('li', {'class': 'neg'}).find('b').text
 
-    return (name, link, int(likes), int(dislikes))
+    logging.debug('inserting {} {} {} {} into the DB'.format(name, link, likes, dislikes))
+
+    with DB_LOCK:
+        cursor.execute("INSERT INTO film (name, url, like, dislike) VALUES (?,?, ?,?)", [name, link, int(likes), int(dislikes)])
+        conn.commit()
+        conn.close()
 
 def initialte_db():
 
@@ -68,13 +81,16 @@ def main():
 
     links = get_links()
 
-    for link in links:
-        name, link, likes, dislikes = parse_a_page(link)
-        print(name, link, likes, dislikes) # TODO logging
-        cursor.execute("INSERT INTO film (name, url, like, dislike) VALUES (?,?, ?,?)", [name, link, likes, dislikes])
+    threads = []
 
-    conn.commit()
-    conn.close()
+    for link in links:
+
+        thread = threading.Thread(target=parse_a_page, args=(link,))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
 
 if __name__ == "__main__":
     main()
