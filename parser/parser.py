@@ -1,6 +1,9 @@
+import threading
 import sqlite3
 import requests
 from bs4 import BeautifulSoup
+
+DATABASE_PATH = 'parser.db'
 
 def create_connection(db_file):
     try:
@@ -39,8 +42,7 @@ def parse_a_page(link):
 
     return (name, link, int(likes), int(dislikes))
 
-def main():
-    database_path = 'parser.db'
+def initialte_db():
 
     sql_create_film_table = """
         CREATE TABLE IF NOT EXISTS film (
@@ -52,12 +54,17 @@ def main():
         );
     """
 
-    conn = create_connection(database_path)
+    conn = create_connection(DATABASE_PATH)
     cursor = conn.cursor()
+
     if conn is not None:
         create_table(conn, sql_create_film_table)
     else:
         print("Error! cannot create the database connection.")
+
+def main():
+
+    initialte_db()
 
     links = get_links()
 
